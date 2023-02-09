@@ -4,18 +4,28 @@ const https = require('https');
 const _ = require('lodash');
 const app = express();
 const mongoose = require('mongoose');
+const encrypt = require('mongoose-encryption');
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  extended: true
+}));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 mongoose.set("strictQuery", false);
-mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
+mongoose.connect("mongodb://localhost:27017/userDB", {
+  useNewUrlParser: true
+});
 
 
-const userSchema = {
+const userSchema = new mongoose.Schema ({
   email: String,
   password: String
-};
+});
+
+
+const secret = "Thisisourlittlesecret";
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ['password']})
+
 
 const User = new mongoose.model("User", userSchema);
 
@@ -37,8 +47,8 @@ app.post("/register", function(req, res) {
     email: req.body.username,
     password: req.body.password
   });
-  newUser.save(function(err){
-    if (err){
+  newUser.save(function(err) {
+    if (err) {
       console.log(err);
     } else {
       res.render("secrets")
@@ -50,13 +60,17 @@ app.post("/login", function(req, res) {
   const username = req.body.username;
   const password = req.body.password;
 
-  User.findOne({email: username}, function(err, foundUser){
+  User.findOne({
+    email: username
+  }, function(err, foundUser) {
     if (err) {
       console.log(err);
     } else {
       if (foundUser) {
         if (foundUser.password === password) {
           res.render("secrets");
+        } else {
+          res.redirect("/login");
         }
       }
     }
@@ -68,6 +82,6 @@ app.post("/login", function(req, res) {
 
 
 
-app.listen("3000", function(){
+app.listen("3000", function() {
   console.log("Server is running on port 3000");
 });
