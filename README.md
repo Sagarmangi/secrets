@@ -1,0 +1,1 @@
+I built this app using JavaScript and Node.js. I used MongoDB for database and Authentications and OAuth using Passport. I styled this app using CSS and Bootstrap. You can sign up to this app and share secret anonymously. Your login data will be totally encrypted.
